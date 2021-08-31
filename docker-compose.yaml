@@ -1,0 +1,21 @@
+version: '2.2'
+
+services:
+  postgres:
+    image: postgres:9.6
+    ports:
+      - "15432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+
+  setup:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile-setup
+    links:
+      - postgres:postgres
+    volumes:
+      - ./:/app:delegated
+    command:
+      - ./build/setup_local.sh

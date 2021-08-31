@@ -74,19 +74,29 @@ object Main extends App {
       // 28 seems to starve the pool and make everything hang
       val queries = List.fill(28)(runQuery.fork)
 
-
-      Semaphore.make(1).flatMap { sem =>
-        ZIO.foreachPar(queries) { fiberEffect =>
-          for {
-            fiber <- sem.withPermit(fiberEffect)
-            before <- instant
-            _ <- putStrLn(s"Time before join: $before")
-            result <- fiber.join
-            after <- instant
-            _ <- putStrLn(s"Time after join: $after")
-          } yield result
-        }
+      ZIO.foreachPar(queries) { fiberEffect =>
+        for {
+          fiber <- fiberEffect
+          before <- instant
+          _ <- putStrLn(s"Time before join: $before")
+          result <- fiber.join
+          after <- instant
+          _ <- putStrLn(s"Time after join: $after")
+        } yield result
       }
+
+//      Semaphore.make(1).flatMap { sem =>
+//        ZIO.foreachPar(queries) { fiberEffect =>
+//          for {
+//            fiber <- sem.withPermit(fiberEffect)
+//            before <- instant
+//            _ <- putStrLn(s"Time before join: $before")
+//            result <- fiber.join
+//            after <- instant
+//            _ <- putStrLn(s"Time after join: $after")
+//          } yield result
+//        }
+//      }
     }.exitCode
   }
 }
